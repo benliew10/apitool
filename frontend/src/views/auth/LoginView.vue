@@ -1,17 +1,25 @@
 <template>
   <AuthLayout>
-    <div class="space-y-6">
+    <div class="space-y-7">
       <!-- Title -->
-      <div class="text-center">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+      <div class="text-center sm:text-left">
+        <p
+          class="mb-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-primary-600 dark:text-primary-400"
+        >
+          {{ t('common.login') }}
+        </p>
+        <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
           {{ t('auth.welcomeBack') }}
         </h2>
-        <p class="mt-2 text-sm text-gray-500 dark:text-dark-400">
+        <p class="mt-2 text-sm leading-relaxed text-gray-500 dark:text-dark-400">
           {{ t('auth.signInToAccount') }}
         </p>
       </div>
 
-  <div v-if="!backendModeEnabled && (linuxdoOAuthEnabled || oidcOAuthEnabled)" class="space-y-4">
+      <div
+        v-if="!backendModeEnabled && (linuxdoOAuthEnabled || oidcOAuthEnabled)"
+        class="space-y-4 rounded-xl border border-slate-200/80 bg-slate-50/80 p-4 dark:border-dark-600/50 dark:bg-dark-900/40"
+      >
         <LinuxDoOAuthSection
           v-if="linuxdoOAuthEnabled"
           :disabled="isLoading"
@@ -23,90 +31,95 @@
           :provider-name="oidcOAuthProviderName"
           :show-divider="false"
         />
-        <div class="flex items-center gap-3">
-          <div class="h-px flex-1 bg-gray-200 dark:bg-dark-700"></div>
-          <span class="text-xs text-gray-500 dark:text-dark-400">
+        <div class="flex items-center gap-3 pt-1">
+          <div class="h-px flex-1 bg-slate-200 dark:bg-dark-600" />
+          <span class="shrink-0 text-[11px] font-medium uppercase tracking-wider text-gray-400 dark:text-dark-500">
             {{ t('auth.oauthOrContinue') }}
           </span>
-          <div class="h-px flex-1 bg-gray-200 dark:bg-dark-700"></div>
+          <div class="h-px flex-1 bg-slate-200 dark:bg-dark-600" />
         </div>
       </div>
 
       <!-- Login Form -->
       <form @submit.prevent="handleLogin" class="space-y-5">
-        <!-- Email Input -->
-        <div>
-          <label for="email" class="input-label">
-            {{ t('auth.emailLabel') }}
-          </label>
-          <div class="relative">
-            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
-              <Icon name="mail" size="md" class="text-gray-400 dark:text-dark-500" />
+        <div class="space-y-4 rounded-xl border border-transparent">
+          <!-- Email Input -->
+          <div>
+            <label for="email" class="input-label">
+              {{ t('auth.emailLabel') }}
+            </label>
+            <div class="group relative">
+              <div
+                class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 transition-colors group-focus-within:text-primary-500"
+              >
+                <Icon name="mail" size="md" class="text-gray-400 dark:text-dark-500" />
+              </div>
+              <input
+                id="email"
+                v-model="formData.email"
+                type="email"
+                required
+                autofocus
+                autocomplete="email"
+                :disabled="isLoading"
+                class="input pl-11 shadow-sm transition-shadow focus:shadow-md"
+                :class="{ 'input-error': errors.email }"
+                :placeholder="t('auth.emailPlaceholder')"
+              />
             </div>
-            <input
-              id="email"
-              v-model="formData.email"
-              type="email"
-              required
-              autofocus
-              autocomplete="email"
-              :disabled="isLoading"
-              class="input pl-11"
-              :class="{ 'input-error': errors.email }"
-              :placeholder="t('auth.emailPlaceholder')"
-            />
+            <p v-if="errors.email" class="input-error-text">
+              {{ errors.email }}
+            </p>
           </div>
-          <p v-if="errors.email" class="input-error-text">
-            {{ errors.email }}
-          </p>
-        </div>
 
-        <!-- Password Input -->
-        <div>
-          <label for="password" class="input-label">
-            {{ t('auth.passwordLabel') }}
-          </label>
-          <div class="relative">
-            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
-              <Icon name="lock" size="md" class="text-gray-400 dark:text-dark-500" />
+          <!-- Password Input -->
+          <div>
+            <div class="mb-1.5 flex items-center justify-between gap-2">
+              <label for="password" class="input-label mb-0">
+                {{ t('auth.passwordLabel') }}
+              </label>
+              <router-link
+                v-if="passwordResetEnabled && !backendModeEnabled"
+                to="/forgot-password"
+                class="text-xs font-medium text-primary-600 transition-colors hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+              >
+                {{ t('auth.forgotPassword') }}
+              </router-link>
             </div>
-            <input
-              id="password"
-              v-model="formData.password"
-              :type="showPassword ? 'text' : 'password'"
-              required
-              autocomplete="current-password"
-              :disabled="isLoading"
-              class="input pl-11 pr-11"
-              :class="{ 'input-error': errors.password }"
-              :placeholder="t('auth.passwordPlaceholder')"
-            />
-            <button
-              type="button"
-              @click="showPassword = !showPassword"
-              class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 transition-colors hover:text-gray-600 dark:hover:text-dark-300"
-            >
-              <Icon v-if="showPassword" name="eyeOff" size="md" />
-              <Icon v-else name="eye" size="md" />
-            </button>
-          </div>
-          <div class="mt-1 flex items-center justify-between">
+            <div class="group relative">
+              <div
+                class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 transition-colors group-focus-within:text-primary-500"
+              >
+                <Icon name="lock" size="md" class="text-gray-400 dark:text-dark-500" />
+              </div>
+              <input
+                id="password"
+                v-model="formData.password"
+                :type="showPassword ? 'text' : 'password'"
+                required
+                autocomplete="current-password"
+                :disabled="isLoading"
+                class="input pl-11 pr-11 shadow-sm transition-shadow focus:shadow-md"
+                :class="{ 'input-error': errors.password }"
+                :placeholder="t('auth.passwordPlaceholder')"
+              />
+              <button
+                type="button"
+                @click="showPassword = !showPassword"
+                class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 transition-colors hover:text-gray-600 dark:hover:text-dark-300"
+              >
+                <Icon v-if="showPassword" name="eyeOff" size="md" />
+                <Icon v-else name="eye" size="md" />
+              </button>
+            </div>
             <p v-if="errors.password" class="input-error-text">
               {{ errors.password }}
             </p>
-            <span v-else></span>
-            <router-link
-              v-if="passwordResetEnabled && !backendModeEnabled"
-              to="/forgot-password"
-              class="text-sm font-medium text-primary-600 transition-colors hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
-            >
-              {{ t('auth.forgotPassword') }}
-            </router-link>
           </div>
         </div>
 
         <!-- Turnstile Widget -->
-        <div v-if="turnstileEnabled && turnstileSiteKey">
+        <div v-if="turnstileEnabled && turnstileSiteKey" class="flex flex-col items-center">
           <TurnstileWidget
             ref="turnstileRef"
             :site-key="turnstileSiteKey"
@@ -123,13 +136,13 @@
         <transition name="fade">
           <div
             v-if="errorMessage"
-            class="rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-800/50 dark:bg-red-900/20"
+            class="rounded-xl border border-red-200/80 bg-red-50/90 p-3.5 dark:border-red-800/40 dark:bg-red-950/40"
           >
             <div class="flex items-start gap-3">
-              <div class="flex-shrink-0">
+              <div class="flex-shrink-0 pt-0.5">
                 <Icon name="exclamationCircle" size="md" class="text-red-500" />
               </div>
-              <p class="text-sm text-red-700 dark:text-red-400">
+              <p class="text-sm leading-snug text-red-800 dark:text-red-300">
                 {{ errorMessage }}
               </p>
             </div>
@@ -140,7 +153,7 @@
         <button
           type="submit"
           :disabled="isLoading || (turnstileEnabled && !turnstileToken)"
-          class="btn btn-primary w-full"
+          class="btn btn-primary btn-lg w-full font-semibold shadow-lg shadow-primary-500/20"
         >
           <svg
             v-if="isLoading"

@@ -153,8 +153,8 @@ describe('路由守卫逻辑', () => {
       expect(redirect).toBeNull()
     })
 
-    it('访问 /home 公开页面允许通过', () => {
-      const redirect = simulateGuard('/home', { requiresAuth: false }, authState)
+    it('访问 /register 公开页面允许通过', () => {
+      const redirect = simulateGuard('/register', { requiresAuth: false }, authState)
       expect(redirect).toBeNull()
     })
   })
@@ -296,14 +296,14 @@ describe('路由守卫逻辑', () => {
   })
 
   describe('Backend Mode', () => {
-    it('unauthenticated: /home redirects to /login', () => {
+    it('unauthenticated: /register redirects to /login in backend mode', () => {
       const authState: MockAuthState = {
         isAuthenticated: false,
         isAdmin: false,
         isSimpleMode: false,
         backendModeEnabled: true,
       }
-      const redirect = simulateGuard('/home', { requiresAuth: false }, authState)
+      const redirect = simulateGuard('/register', { requiresAuth: false }, authState)
       expect(redirect).toBe('/login')
     })
 
