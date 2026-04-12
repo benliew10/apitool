@@ -21,7 +21,7 @@
           <div
             class="mb-6 inline-flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-white/10 shadow-lg ring-1 ring-white/20 backdrop-blur-sm"
           >
-            <img :src="siteLogo || '/logo.png'" alt="" class="h-full w-full object-contain p-1" />
+            <img :src="siteLogo || DEFAULT_SITE_LOGO" alt="" class="h-full w-full object-contain p-1" />
           </div>
           <h1 class="text-3xl font-semibold tracking-tight text-white">
             {{ siteName }}
@@ -54,7 +54,7 @@
           <div
             class="mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl shadow-lg shadow-primary-500/25 ring-1 ring-gray-200/80 dark:ring-dark-600"
           >
-            <img :src="siteLogo || '/logo.png'" alt="" class="h-full w-full object-contain" />
+            <img :src="siteLogo || DEFAULT_SITE_LOGO" alt="" class="h-full w-full object-contain" />
           </div>
           <h1 class="text-gradient text-2xl font-bold tracking-tight">
             {{ siteName }}
@@ -88,6 +88,7 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
 import { useAppStore } from '@/stores'
+import { DEFAULT_SITE_LOGO } from '@/constants/branding'
 import { sanitizeUrl } from '@/utils/url'
 
 const appStore = useAppStore()

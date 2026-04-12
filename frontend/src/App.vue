@@ -7,6 +7,7 @@ import { resolveDocumentTitle } from '@/router/title'
 import AnnouncementPopup from '@/components/common/AnnouncementPopup.vue'
 import { useAppStore, useAuthStore, useSubscriptionStore, useAnnouncementStore } from '@/stores'
 import { getSetupStatus } from '@/api/setup'
+import { DEFAULT_FAVICON } from '@/constants/branding'
 
 const router = useRouter()
 const route = useRoute()
@@ -20,24 +21,24 @@ const announcementStore = useAnnouncementStore()
  * @param logoUrl - URL of the logo to use as favicon
  */
 function updateFavicon(logoUrl: string) {
-  // Find existing favicon link or create new one
-  let link = document.querySelector<HTMLLinkElement>('link[rel="icon"]')
-  if (!link) {
-    link = document.createElement('link')
-    link.rel = 'icon'
-    document.head.appendChild(link)
-  }
-  link.type = logoUrl.endsWith('.svg') ? 'image/svg+xml' : 'image/x-icon'
+  // Drop old links so Chrome/Safari pick up href changes (favicon cache is aggressive)
+  document.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]').forEach((el) => el.remove())
+  const link = document.createElement('link')
+  link.rel = 'icon'
+  const pathOnly = logoUrl.split('?')[0].toLowerCase()
+  if (pathOnly.endsWith('.svg')) link.type = 'image/svg+xml'
+  else if (pathOnly.endsWith('.png')) link.type = 'image/png'
+  else if (pathOnly.endsWith('.ico')) link.type = 'image/x-icon'
+  else link.type = 'image/png'
   link.href = logoUrl
+  document.head.appendChild(link)
 }
 
-// Watch for site settings changes and update favicon/title
+// Tab icon: admin site_logo URL if set; else dedicated /favicon.png (not /logo.png — avoids stale tab cache)
 watch(
   () => appStore.siteLogo,
   (newLogo) => {
-    if (newLogo) {
-      updateFavicon(newLogo)
-    }
+    updateFavicon(newLogo?.trim() ? newLogo : DEFAULT_FAVICON)
   },
   { immediate: true }
 )

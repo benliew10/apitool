@@ -1,7 +1,25 @@
+import { copyFileSync, existsSync } from 'node:fs'
+import { dirname, join, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { defineConfig, loadEnv, Plugin } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import checker from 'vite-plugin-checker'
-import { resolve } from 'path'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+
+/** Copy `public/logo.png` → `public/favicon.png` so the tab uses a distinct URL from in-page logo (better cache behavior). */
+function syncFaviconFromLogo(): Plugin {
+  return {
+    name: 'sync-favicon-from-logo',
+    buildStart() {
+      const src = join(__dirname, 'public', 'logo.png')
+      const dst = join(__dirname, 'public', 'favicon.png')
+      if (existsSync(src)) {
+        copyFileSync(src, dst)
+      }
+    },
+  }
+}
 
 /**
  * Vite 插件：开发模式下注入公开配置到 index.html
@@ -42,6 +60,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [
+      syncFaviconFromLogo(),
       vue(),
       checker({
         typescript: true,
