@@ -67,6 +67,33 @@ type AnthropicContentBlock struct {
 	IsError   bool            `json:"is_error,omitempty"`
 }
 
+// MarshalJSON ensures type=text blocks always include a "text" field. The default
+// encoder uses omitempty on Text, so empty strings become {"type":"text"} and
+// Anthropic-compatible clients (SDKs) may omit the body entirely.
+func (b AnthropicContentBlock) MarshalJSON() ([]byte, error) {
+	if b.Type == "text" {
+		return json.Marshal(struct {
+			Type string `json:"type"`
+			Text string `json:"text"`
+		}{Type: "text", Text: b.Text})
+	}
+	return json.Marshal(struct {
+		Type      string                `json:"type"`
+		Thinking  string                `json:"thinking,omitempty"`
+		Source    *AnthropicImageSource `json:"source,omitempty"`
+		ID        string                `json:"id,omitempty"`
+		Name      string                `json:"name,omitempty"`
+		Input     json.RawMessage       `json:"input,omitempty"`
+		ToolUseID string                `json:"tool_use_id,omitempty"`
+		Content   json.RawMessage       `json:"content,omitempty"`
+		IsError   bool                  `json:"is_error,omitempty"`
+	}{
+		Type: b.Type, Thinking: b.Thinking, Source: b.Source,
+		ID: b.ID, Name: b.Name, Input: b.Input,
+		ToolUseID: b.ToolUseID, Content: b.Content, IsError: b.IsError,
+	})
+}
+
 // AnthropicImageSource describes the source data for an image content block.
 type AnthropicImageSource struct {
 	Type      string `json:"type"` // "base64"

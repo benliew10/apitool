@@ -1135,3 +1135,20 @@ func TestAnthropicToResponses_ToolWithNilSchema(t *testing.T) {
 	assert.JSONEq(t, `"object"`, string(params["type"]))
 	assert.JSONEq(t, `{}`, string(params["properties"]))
 }
+
+func TestAnthropicContentBlock_MarshalJSON_TextAlwaysIncludesKey(t *testing.T) {
+	b := AnthropicContentBlock{Type: "text", Text: ""}
+	raw, err := json.Marshal(b)
+	require.NoError(t, err)
+	assert.JSONEq(t, `{"type":"text","text":""}`, string(raw))
+
+	b2 := AnthropicContentBlock{Type: "text", Text: "hi"}
+	raw2, err := json.Marshal(b2)
+	require.NoError(t, err)
+	assert.JSONEq(t, `{"type":"text","text":"hi"}`, string(raw2))
+
+	tu := AnthropicContentBlock{Type: "tool_use", ID: "x", Name: "n", Input: json.RawMessage(`{}`)}
+	raw3, err := json.Marshal(tu)
+	require.NoError(t, err)
+	assert.NotContains(t, string(raw3), `"text"`)
+}
